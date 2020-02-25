@@ -6,6 +6,6 @@ import structures.Stack;
 public class InvalidStackFormatException extends RuntimeException
 {
 	public InvalidStackFormatException(String correctFormat, Stack wrongStack) {
-		super("Format is invalid, should be " + correctFormat + ", but is " + wrongStack);
+		super("Format is invalid, should be '" + correctFormat + "', but is " + wrongStack);
 	}
 }

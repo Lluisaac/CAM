@@ -3,6 +3,7 @@ package instructions;
 import java.util.ArrayList;
 import java.util.List;
 
+import exceptions.InvalidInstructionFormatException;
 import structures.Code;
 
 public interface Instruction
@@ -21,19 +22,49 @@ public interface Instruction
 		{
 			if (names.get(i).contains("cur"))
 			{
-				String newCode = names.get(i).substring(5, findClosingParen(names.get(i))).replaceFirst("cur ", "");
-				list.add(new Cur(new Code(newCode)));
-				System.out.println();
+				if (names.get(i).charAt(0) != '(')
+				{
+					throw new InvalidInstructionFormatException("paranthesis are missing: (cur C)", names.get(i));
+				}
+				else
+				{
+					String newCode = names.get(i).substring(5, findClosingParen(names.get(i))).replaceFirst("cur ", "");
+					list.add(new Cur(new Code(newCode)));
+					System.out.println();
+				}
 
 			}
 			else if (names.get(i).contains("quote"))
 			{
-				int value = Integer.parseInt(names.get(i).substring(7, names.get(i).length() - 1));
-				list.add(new Quote(value));
+				if (names.get(i).charAt(0) != '(')
+				{
+					throw new InvalidInstructionFormatException("paranthesis are missing: (quote n)", names.get(i));
+				}
+				else
+				{
+					String substring = names.get(i).substring(7, names.get(i).length() - 1);
+
+					try
+					{
+						int value = Integer.parseInt(substring);
+						list.add(new Quote(value));
+					}
+					catch (NumberFormatException e)
+					{
+						throw new InvalidInstructionFormatException("'" + substring + "' is not a valid number: (quote n)", names.get(i));
+					}
+				}
 			}
 			else
 			{
-				list.add(EnumInstruction.valueOf(names.get(i)));
+				try
+				{
+					list.add(EnumInstruction.valueOf(names.get(i)));
+				}
+				catch (IllegalArgumentException e)
+				{
+					throw new InvalidInstructionFormatException("it is not a valid CAM instruction", names.get(i));
+				}
 			}
 		}
 
@@ -48,7 +79,7 @@ public interface Instruction
 		{
 			int findNextInstruction = findNextInstruction(code);
 			list.add(code.substring(0, findNextInstruction));
-			
+
 			if (code.length() != findNextInstruction)
 			{
 				code = code.substring(findNextInstruction + 1);
